@@ -10,9 +10,15 @@ module Fuzzily
       by.class_eval do
         return if class_variable_defined?(:@@fuzzily_trigram_model)
 
+        ## START: NEW
+        belongs_to :user
+        validates_presence_of :user
+        validates_uniqueness_of :trigram, :scope => [:user_id, :owner_type, :owner_id, :fuzzy_field]
+        ## END:   NEW
+
         belongs_to :owner, :polymorphic => true
         validates_presence_of     :owner
-        validates_uniqueness_of   :trigram, :scope => [:owner_type, :owner_id, :fuzzy_field]
+        # validates_uniqueness_of   :trigram, :scope => [:owner_type, :owner_id, :fuzzy_field]
         validates_length_of       :trigram, :is => 3
         validates_presence_of     :score
         validates_presence_of     :fuzzy_field
@@ -32,8 +38,8 @@ module Fuzzily
       module Rails2
         def _matches_for_trigrams(trigrams)
           self.
-            scoped(:select => 'owner_id, owner_type, count(*) AS matches, MAX(score) AS score').
-            scoped(:group => 'owner_id, owner_type').
+            scoped(:select => 'user_id, owner_id, owner_type, count(*) AS matches, MAX(score) AS score').
+            scoped(:group => 'user_id, owner_id, owner_type').
             scoped(:order => 'matches DESC, score ASC').
             with_trigram(trigrams)
         end
@@ -41,6 +47,9 @@ module Fuzzily
         def _add_fuzzy_scopes
           named_scope :for_model,  lambda { |model| { 
             :conditions => { :owner_type => model.kind_of?(Class) ? model.name : model  } 
+          }}
+          named_scope :for_user,  lambda { |u_id| { 
+            :conditions => { :user_id => u_id } 
           }}
           named_scope :for_field,  lambda { |field_name| {
             :conditions => { :fuzzy_field => field_name }
@@ -55,8 +64,8 @@ module Fuzzily
       module Rails3
         def _matches_for_trigrams(trigrams)
           self.
-            select('owner_id, owner_type, count(*) AS matches, MAX(score) AS score').
-            group('owner_id, owner_type').
+            select('user_id, owner_id, owner_type, count(*) AS matches, MAX(score) AS score').
+            group('user_id, owner_id, owner_type').
             order('matches DESC, score ASC').
             with_trigram(trigrams)
         end

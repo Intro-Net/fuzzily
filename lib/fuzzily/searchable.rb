@@ -42,6 +42,7 @@ module Fuzzily
           limit(options[:limit]).
           offset(options[:offset]).
           for_model(self.name).
+          for_user(_o.user_id).
           for_field(_o.field.to_s).
           matches_for(pattern)
         records = _load_for_ids(trigrams.map(&:owner_id))
@@ -74,10 +75,11 @@ module Fuzzily
           # take care of quoting
           c = trigram_class.connection
           insert_sql = %Q{
-            INSERT INTO %s (%s, %s, %s, %s, %s)
+            INSERT INTO %s (%s, %s, %s, %s, %s, %s)
             VALUES
           } % [
             c.quote_table_name(trigram_class.table_name),
+            c.quote_column_name('user_id'),
             c.quote_column_name('owner_type'),
             c.quote_column_name('owner_id'),
             c.quote_column_name('fuzzy_field'),
