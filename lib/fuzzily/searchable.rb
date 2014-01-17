@@ -42,7 +42,7 @@ module Fuzzily
           limit(options[:limit]).
           offset(options[:offset]).
           for_model(self.name).
-          for_user(self.user_id).
+          for_user(options[:user_id]).
           for_field(_o.field.to_s).
           matches_for(pattern)
         records = _load_for_ids(trigrams.map(&:owner_id))
