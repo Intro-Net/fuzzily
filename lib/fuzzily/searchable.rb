@@ -68,7 +68,7 @@ module Fuzzily
           batch.each do |record|
             data = Fuzzily::String.new(record.send(_o.field))
             data.scored_trigrams.each do |trigram, score|
-              inserts << sanitize_sql_array(['(?,?,?,?,?,?)', _o.user_id, self.name, record.id, _o.field.to_s, score, trigram])
+              inserts << sanitize_sql_array(['(?,?,?,?,?,?)', record.user_id, self.name, record.id, _o.field.to_s, score, trigram])
             end
           end
 

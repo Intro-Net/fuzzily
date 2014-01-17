@@ -74,6 +74,7 @@ module Fuzzily
           scope :for_model,  lambda { |model|
             where(:owner_type => model.kind_of?(Class) ? model.name : model)
           }
+          scope :for_user,   lambda { |u_id| where(:user_id => u_id) }
           scope :for_field,  lambda { |field_name| where(:fuzzy_field => field_name) }
           scope :with_trigram, lambda { |trigrams| where(:trigram => trigrams) }
         end
